@@ -1,0 +1,7 @@
+---
+- name: Verify openshift cluster is ready for upgrade
+  hosts: localhost
+  vars:
+    save_json: false
+  roles:
+  - cluster-status-check

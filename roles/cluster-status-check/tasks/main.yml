@@ -1,0 +1,105 @@
+###############################################################################
+# NOTE: If you want the debug output to be save , you may want to wait till
+#       The cluster has started to response properly to the "oc get co" command
+#       If the api call itself is failing you will not have a json response to
+#       save to file.
+###############################################################################
+
+- name: Debug run to save json for debuging
+  k8s_info:
+    api_version: v1
+    kind: ClusterOperator
+  register: reg_ocp_co
+  ignore_errors: true
+  when: save_json | bool
+
+- name: Saving json output to /tmp/cluster_operators.json
+  copy:
+    content: "{{ reg_ocp_co }}"
+    dest: /tmp/cluster_operators.json
+  when: save_json | bool
+
+- name: Wait for cluster operator api call to be successfull
+  k8s_info:
+    api_version: v1
+    kind: ClusterOperator
+  register: reg_ocp_co
+  ignore_errors: true
+  until:
+    - reg_ocp_co.rc is not defined
+  retries: 60 # wait for 1 hour max
+  delay: 60
+
+###############################################################################
+# I tend to use jmespath_terminal to look at the json output and filter my
+# queries so that I have a working working query when I start using it in
+# ansible playbooks. It is no fun debuging json queries by running the actual
+# ansible playbook.
+# Ref: https://github.com/jmespath/jmespath.terminal
+#
+# pip3 install --user jmespath-terminal
+# jpterm /tmp/cluster_operators.json
+###############################################################################
+
+- name: Wait for all cluster operators to be available
+  k8s_info:
+    api_version: v1
+    kind: ClusterOperator
+  register: reg_ocp_co
+  vars:
+    available_query: "resources[*].status.conditions[?type=='Available'].status"
+    available: "{{ reg_ocp_co | json_query(available_query) | flatten | unique }}"
+    progressing_query: "resources[*].status.conditions[?type=='Progressing'].status"
+    progressing: "{{ reg_ocp_co | json_query(progressing_query) | flatten | unique }}"
+    degraded_query: "resources[*].status.conditions[?type=='Degraded'].status"
+    degraded: "{{ reg_ocp_co | json_query(degraded_query) | flatten | unique }}"
+  until:
+    - reg_ocp_co.resources is defined
+    - reg_ocp_co.resources | length > 2
+    - available == ['True']
+    - progressing == ['False']
+    - degraded == ['False']
+  retries: 60 # wait for 1 hour max
+  delay: 60
+  ignore_errors: true
+# Why the condition - " reg_ocp_co.resources | length > 2 "
+# When a cluster starts coming up during a bootstrap process and the api starts
+# responding, it starts up the cloud-credential controller first. Mind you at
+# this point the bootstrap server is resonding to the api calls.
+# Following that the network operator starts. Can't remember now which is the
+# 3rd operator that starts. I think it is the machine-config operator.
+# Either way, there is an edge case that results in intial 2 cluster operators
+# to have status that would meet our success criteria that we are looking for.
+# The success criteria being.
+# available=True, progressing=False, degraded=False
+# So the condition waits for at least 3 or more of the cluster operators to
+# start up before we check for our success criteria.
+
+# NOTE: For a Disconnected cluster replace the queries with the queires listed
+#       at the end of this file.
+
+# NOTE: For a cluster where all your worker nodes are not in the load baalcner
+#       pool for *.apps subdomain, please refere to the 2nd notessection.
+
+
+###############################################################################
+# What do the queries do ?
+#
+# Step1: Gather all the cluster operators. The json is stord in reg_ocp_co
+#
+# Step2: Gather the status of the "Available" column for all the operators
+#        This is restured as a list within in a list
+#        We flatten the list and filter it through unique
+#        If All the operators have a status of True for the available column
+#        you will end up with
+#        available: ['True']
+#        If even 1 operator has a status of False the resultant list will be
+#        available: ['True', 'False']
+#
+# Step4: we do the same for "Progressing" and "Degraded" columns as well
+#
+# Step5: Loop through ignoring all error until all the cluster operators go
+#        active. Final good state will be
+#        available: ['True'] , progressing: ['False'] , degraded: ['False']
+#
+###############################################################################
