@@ -2,6 +2,16 @@
 - name: Verify openshift cluster is ready for upgrade
   hosts: localhost
   vars:
-    save_json: false
+    debug_json: false
   roles:
-  - cluster-status-check
+  - pre-upgrade-check
+
+- name: Upgrade openshift cluster
+  hosts: localhost
+
+- name: Verify cluster health after upgrade has completed
+  hosts: localhost
+  vars:
+    debug_json: false
+  roles:
+    - post-upgrade-check

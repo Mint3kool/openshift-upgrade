@@ -1,0 +1,67 @@
+###############################################################################
+# NOTE: If you want the debug output to be save , you may want to wait till
+#       The cluster has started to response properly to the "oc get co" command
+#       If the api call itself is failing you will not have a json response to
+#       save to file.
+###############################################################################
+
+- name: Wait for cluster operator api call to be successfull
+  k8s_info:
+    api_version: v1
+    kind: ClusterOperator
+  register: reg_ocp_co
+  ignore_errors: true
+  when: not debug_json | bool
+  until:
+    - reg_ocp_co.rc is not defined
+  retries: 60 # wait for 1 hour max
+  delay: 60
+
+- name: Debug run to save ClusterOperator json for debuging
+  k8s_info:
+    api_version: v1
+    kind: ClusterOperator
+  register: reg_ocp_co
+  ignore_errors: true
+  when: debug_json | bool
+
+- name: Saving json output to /tmp/cluster_operators.json
+  copy:
+    content: "{{ reg_ocp_co }}"
+    dest: /tmp/cluster_operators.json
+  when: debug_json | bool
+
+###############################################################################
+# I tend to use jmespath_terminal to look at the json output and filter my
+# queries so that I have a working working query when I start using it in
+# ansible playbooks. It is no fun debuging json queries by running the actual
+# ansible playbook.
+# Ref: https://github.com/jmespath/jmespath.terminal
+#
+# pip3 install --user jmespath-terminal
+# jpterm /tmp/cluster_operators.json
+###############################################################################
+
+- name: Wait for all cluster operators to be available
+  k8s_info:
+    api_version: v1
+    kind: ClusterOperator
+  register: reg_ocp_co
+  vars:
+    available_query: "resources[*].status.conditions[?type=='Available'].status"
+    available: "{{ reg_ocp_co | json_query(available_query) | flatten | unique }}"
+    progressing_query: "resources[*].status.conditions[?type=='Progressing'].status"
+    progressing: "{{ reg_ocp_co | json_query(progressing_query) | flatten | unique }}"
+    degraded_query: "resources[*].status.conditions[?type=='Degraded'].status"
+    degraded: "{{ reg_ocp_co | json_query(degraded_query) | flatten | unique }}"
+  when: not debug_json | bool
+  until:
+    - reg_ocp_co.resources is defined
+    - reg_ocp_co.resources | length > 2
+    - available == ['True']
+    - progressing == ['False']
+    - degraded == ['False']
+  retries: 60 # wait for 1 hour max
+  delay: 60
+
+#############################################################################

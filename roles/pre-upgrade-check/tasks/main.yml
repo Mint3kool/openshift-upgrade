@@ -5,19 +5,19 @@
 #       save to file.
 ###############################################################################
 
-- name: Debug run to save json for debuging
+- name: Debug run to save ClusterOperator json for debuging
   k8s_info:
     api_version: v1
     kind: ClusterOperator
   register: reg_ocp_co
   ignore_errors: true
-  when: save_json | bool
+  when: debug_json | bool
 
 - name: Saving json output to /tmp/cluster_operators.json
   copy:
     content: "{{ reg_ocp_co }}"
     dest: /tmp/cluster_operators.json
-  when: save_json | bool
+  when: debug_json | bool
 
 - name: Wait for cluster operator api call to be successfull
   k8s_info:
@@ -25,6 +25,7 @@
     kind: ClusterOperator
   register: reg_ocp_co
   ignore_errors: true
+  when: not debug_json | bool
   until:
     - reg_ocp_co.rc is not defined
   retries: 60 # wait for 1 hour max
@@ -53,6 +54,7 @@
     progressing: "{{ reg_ocp_co | json_query(progressing_query) | flatten | unique }}"
     degraded_query: "resources[*].status.conditions[?type=='Degraded'].status"
     degraded: "{{ reg_ocp_co | json_query(degraded_query) | flatten | unique }}"
+  when: not debug_json | bool
   until:
     - reg_ocp_co.resources is defined
     - reg_ocp_co.resources | length > 2
@@ -61,7 +63,7 @@
     - degraded == ['False']
   retries: 60 # wait for 1 hour max
   delay: 60
-  ignore_errors: true
+
 # Why the condition - " reg_ocp_co.resources | length > 2 "
 # When a cluster starts coming up during a bootstrap process and the api starts
 # responding, it starts up the cloud-credential controller first. Mind you at
@@ -81,6 +83,34 @@
 # NOTE: For a cluster where all your worker nodes are not in the load baalcner
 #       pool for *.apps subdomain, please refere to the 2nd notessection.
 
+- name: Debug run to save ClusterVersion json for debuging
+  k8s_info:
+    api_version: v1
+    kind: ClusterVersion
+  register: reg_ocp_version
+  ignore_errors: true
+  when: debug_json | bool
+
+- name: Saving json output to /tmp/cluster_version.json
+  copy:
+    content: "{{ reg_ocp_version }}"
+    dest: /tmp/cluster_version.json
+  when: debug_json | bool
+
+- name: Make sure Current Cluster is not in the process of upgrading
+  k8s_info:
+    api_version: v1
+    kind: ClusterVersion
+  register: reg_ocp_version
+  vars:
+    available_query: "resources[0].status.conditions[?type=='Progressing'].status"
+    available: "{{ reg_ocp_version | json_query(available_query) | flatten | unique }}"
+  when: not debug_json | bool
+  until:
+    - reg_ocp_version.resources is defined
+    - available == ['False']
+  retries: 10 # wait for 5 minutes max
+  delay: 30
 
 ###############################################################################
 # What do the queries do ?
@@ -102,4 +132,5 @@
 #        active. Final good state will be
 #        available: ['True'] , progressing: ['False'] , degraded: ['False']
 #
+# Step6: Make sure the cluster is not currently upgrading
 ###############################################################################
