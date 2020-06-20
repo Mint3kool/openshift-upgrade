@@ -28,7 +28,7 @@
   when: not debug_json | bool
   until:
     - reg_ocp_co.rc is not defined
-  retries: 60 # wait for 1 hour max
+  retries: 10 # wait for 10 min max, otherwise abort
   delay: 60
 
 ###############################################################################

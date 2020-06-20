@@ -8,6 +8,10 @@
 
 - name: Upgrade openshift cluster
   hosts: localhost
+  vars:
+    upgrade: false
+  roles:
+  - cluster-upgrade
 
 - name: Verify cluster health after upgrade has completed
   hosts: localhost
