@@ -1,0 +1,14 @@
+#Get all possible upgrade paths
+- name: Get the information on all possible upgrade paths
+  command: oc adm upgrade
+  register: raw_upgrade_info # I'd like to somehow list all upgrade paths
+
+- name: Saving json output to /tmp/raw_upgrade_info.json
+  copy:
+    content: "{{ raw_upgrade_info }}"
+    dest: /tmp/raw_upgrade_info.json
+  when: debug_json | bool
+
+- name: Display upgrade information
+  debug:
+    msg: "{{raw_upgrade_info | json_query(\"stdout_lines\") | flatten | unique}}"

@@ -1,0 +1,7 @@
+- name: Debug input version number
+  debug:
+    msg: "{{upgrade_version}}"
+
+    #- name: Perform the selected upgrade
+    #command: oc adm upgrade --to= "{{upgrade_version}}"
+    #when: upgrade | bool

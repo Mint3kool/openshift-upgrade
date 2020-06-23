@@ -4,18 +4,30 @@
   vars:
     debug_json: false
   roles:
-  - pre-upgrade-check
+    #- pre-upgrade-check
 
-- name: Upgrade openshift cluster
+- name: Gather relevant openshift cluster information
+  hosts: localhost
+  vars:
+    debug_json: true
+  roles:
+  - gather-cluster-info
+
+- name: Upgrade cluster based on user input
   hosts: localhost
   vars:
     upgrade: false
+    debug_json: true
+  vars_prompt:
+  - name: "upgrade_version"
+    prompt: "Which version would you like to upgrade to?"
+    private: no
   roles:
-  - cluster-upgrade
+  - upgrade-cluster
 
 - name: Verify cluster health after upgrade has completed
   hosts: localhost
   vars:
     debug_json: false
   roles:
-    - post-upgrade-check
+    #- post-upgrade-check
