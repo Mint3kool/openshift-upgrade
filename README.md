@@ -26,27 +26,15 @@ Information about these scripts:
 
 # Solution
 
-<ol>
-<li>Pre Upgrade</li>
-  <ol>
+1. Pre Upgrade
     * Verifys that the cluster is up
     * Checks current cluster operator health
     * Checks current cluster status
-  </ol>
-<li>Gathering Cluster Information</li>
-  <ol>
+2. Gathering Cluster Information
     * Gets the current upgrade paths and displays them to the user
-  </ol>
-<li>Upgrading The Cluster
-  <ol>
-    * Requests for user to input desired upgrade version
+3. Upgrading The Cluster
     * Runs
     > oc adm upgrade --to=<cluster_version>
-  </ol>
-</li>
-<li>Post Upgrade</li>
-  <ol>
+4. Post Upgrade
     * Makes sure the cluster is up
     * Makes sure all cluster operators are up
-  </ol>
-</ol>
