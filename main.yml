@@ -4,7 +4,7 @@
   vars:
     debug_json: false
   roles:
-    #- pre-upgrade-check
+    - pre-upgrade-check
 
 - name: Gather relevant openshift cluster information
   hosts: localhost
@@ -30,4 +30,4 @@
   vars:
     debug_json: false
   roles:
-    #- post-upgrade-check
+    - post-upgrade-check
