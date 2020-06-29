@@ -23,3 +23,30 @@ Information about these scripts:
 
 * Your user has access to the cluster with admin privileges
 * You have a recent backup of the cluster in case the upgrade process fails
+
+# Solution
+
+<ol>
+<li>Pre Upgrade</li>
+  <ol>
+    * Verifys that the cluster is up
+    * Checks current cluster operator health
+    * Checks current cluster status
+  </ol>
+<li>Gathering Cluster Information</li>
+  <ol>
+    * Gets the current upgrade paths and displays them to the user
+  </ol>
+<li>Upgrading The Cluster
+  <ol>
+    * Requests for user to input desired upgrade version
+    * Runs
+    > oc adm upgrade --to=<cluster_version>
+  </ol>
+</li>
+<li>Post Upgrade</li>
+  <ol>
+    * Makes sure the cluster is up
+    * Makes sure all cluster operators are up
+  </ol>
+</ol>
