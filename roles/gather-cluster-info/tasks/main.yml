@@ -9,6 +9,8 @@
     dest: /tmp/raw_upgrade_info.json
   when: debug_json | bool
 
+# The result of the upgrade command does not have nicely formatted 
+# json, so this is the quick and dirty way to display it
 - name: Display upgrade information
   debug:
     msg: "{{raw_upgrade_info | json_query(\"stdout_lines\") | flatten | unique}}"

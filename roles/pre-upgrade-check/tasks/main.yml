@@ -77,11 +77,11 @@
 # So the condition waits for at least 3 or more of the cluster operators to
 # start up before we check for our success criteria.
 
-# NOTE: For a Disconnected cluster replace the queries with the queires listed
+# NOTE: For a Disconnected cluster replace the queries with the queries listed
 #       at the end of this file.
 
-# NOTE: For a cluster where all your worker nodes are not in the load baalcner
-#       pool for *.apps subdomain, please refere to the 2nd notessection.
+# NOTE: For a cluster where all your worker nodes are not in the load balacner
+#       pool for *.apps subdomain, please refere to the 2nd notes section.
 
 - name: Debug run to save ClusterVersion json for debuging
   k8s_info:

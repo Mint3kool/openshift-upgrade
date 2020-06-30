@@ -1,0 +1,4 @@
+Role Description
+~~~~~~~~~~~~~~~~
+
+The purpose of this role is to run the *oc* upgrade command to upgrade the cluster.

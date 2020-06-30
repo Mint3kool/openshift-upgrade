@@ -1,0 +1,4 @@
+Role Description
+~~~~~~~~~~~~~~~~
+
+The purpose of this role is to verify cluster health prior to performing a cluster upgrade. We are only attempting to upgrade from a healthy cluster since there are far too many edge cases that may prevent an upgrade if certain operators or components are down.
