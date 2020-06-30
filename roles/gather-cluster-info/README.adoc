@@ -1,0 +1,4 @@
+Role Description
+~~~~~~~~~~~~~~~~
+
+The purpose of this role is to get the current upgrade paths and give them back to the user
