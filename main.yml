@@ -16,8 +16,7 @@
 - name: Upgrade cluster based on user input
   hosts: localhost
   vars:
-    upgrade: false
-    debug_json: true
+    upgrade: true
   vars_prompt:
   - name: "upgrade_version"
     prompt: "Which version would you like to upgrade to?"
