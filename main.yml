@@ -9,7 +9,7 @@
 - name: Gather relevant openshift cluster information
   hosts: localhost
   vars:
-    debug_json: true
+    debug_json: false
   roles:
   - gather-cluster-info
 

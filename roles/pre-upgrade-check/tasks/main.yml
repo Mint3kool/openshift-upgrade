@@ -103,8 +103,8 @@
     kind: ClusterVersion
   register: reg_ocp_version
   vars:
-    available_query: "resources[0].status.conditions[?type=='Progressing'].status"
-    available: "{{ reg_ocp_version | json_query(available_query) | flatten | unique }}"
+    progressing_query: "resources[0].status.conditions[?type=='Progressing'].status"
+    progressing: "{{ reg_ocp_version | json_query(available_query) | flatten | unique }}"
   when: not debug_json | bool
   until:
     - reg_ocp_version.resources is defined
