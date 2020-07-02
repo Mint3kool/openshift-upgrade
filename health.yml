@@ -1,0 +1,7 @@
+---
+- name: Check cluster health 
+  hosts: localhost
+  vars:
+    debug_json: false 
+  roles:
+    - cluster-health-check
