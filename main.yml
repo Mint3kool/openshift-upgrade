@@ -1,37 +1,65 @@
 ---
-# - name: Verify openshift cluster is ready for upgrade
-#   hosts: localhost
-#   vars:
-#     debug_json: false
-#   roles:
-#     - pre-upgrade-check
-# 
-# - name: Gather relevant openshift cluster information
-#   hosts: localhost
-#   vars:
-#     debug_json: false
-#   roles:
-#   - gather-cluster-info
-# 
-# - name: Upgrade cluster based on user input
-#   hosts: localhost
-#   vars:
-#     upgrade: true
-#   vars_prompt:
-#   - name: "upgrade_version"
-#     prompt: "Which version would you like to upgrade to?"
-#     private: no
-#   roles:
-#   - upgrade-cluster
-# 
-- name: Verify cluster health after upgrade has completed
-  hosts: localhost
-  vars:
-    debug_json: false
-  roles:
-    - post-upgrade-check
+ - name: Verify openshift cluster is ready for upgrade
+   hosts: localhost
+   tasks:
+     - block:
+       - include_role:
+           name: pre-upgrade-check
+         vars:
+           debug_json: false
+       rescue:
+       - include_role:
+           name: send-slack-message
+         vars:
+           failed: true
 
-#  post_tasks:
-#    - debug:
-#        var: 
-#          progressing_query
+ - name: Gather relevant openshift cluster information
+   hosts: localhost
+   tasks:
+     - block:
+       - include_role:
+           name: gather-cluster-info
+         vars:
+           debug_json: false
+       rescue:
+       - include_role:
+           name: send-slack-message
+         vars:
+           failed: true
+ 
+ - name: Upgrade cluster based on user input
+   hosts: localhost
+   tasks:
+     - block:
+       - include_role:
+           name: upgrade-cluster
+         vars:
+           upgrade: true
+       rescue:
+       - include_role:
+           name: send-slack-message
+         vars:
+           failed: true
+   vars_prompt:
+   - name: "upgrade_version"
+     prompt: "Which version would you like to upgrade to?"
+     private: no
+ 
+ - name: Verify cluster health after upgrade has completed
+   hosts: localhost
+   tasks:
+     - block:
+       - include_role:
+           name: post-upgrade-check
+         vars:
+           debug_json: false
+       - include_role:
+           name: send-slack-message
+         vars:
+           failed: false
+       rescue:
+       - include_role:
+           name: send-slack-message
+         vars:
+           failed: true
+       
