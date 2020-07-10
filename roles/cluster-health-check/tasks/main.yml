@@ -28,20 +28,6 @@
     dest: /tmp/cluster_operators.json
   when: debug_json | bool
 
-- name: Debug run to save ClusterVersion json for debugging
-  k8s_info:
-    api_version: v1
-    kind: ClusterVersion
-  register: reg_ocp_version
-  ignore_errors: true
-  when: debug_json | bool
-
-- name: Saving json output to /tmp/cluster_version.json
-  copy:
-    content: "{{ reg_ocp_version }}"
-    dest: /tmp/cluster_version.json
-  when: debug_json | bool
-
 - name: Debug run to save Node info json for debugging
   k8s_info:
     api_version: v1

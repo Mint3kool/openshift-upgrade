@@ -2,7 +2,7 @@
 - name: Verify openshift cluster is ready for upgrade
   hosts: localhost
   vars:
-    debug_json: true
+    debug_json: false
   tasks:
   - name: Check cluster prior to upgrade
     include_role:
@@ -18,7 +18,7 @@
   hosts: localhost
   vars_prompt:
   - name: "upgrade_version"
-    prompt: "Which version of OpenShift would you like ot upgrade to?"
+    prompt: "Which version of OpenShift do you want to upgrade to?"
     private: no
   vars:
     debug_json: false

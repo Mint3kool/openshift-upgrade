@@ -28,5 +28,5 @@
     - reg_ocp_version.resources is defined
     - progressing == ['False']
     - desired == [upgrade_version]
-  retries: 10 # wait for 5 minutes max
-  delay: 30
+  retries: 60 # wait for 5 minutes max
+  delay: 60

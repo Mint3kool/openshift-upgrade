@@ -45,3 +45,7 @@ Notes
 * ref: https://github.com/jmespath/jmespath.terminal
   - pip3 install --user jmespath-terminal
   - jpterm <your_json_file>
+
+* During the upgrade process, you will periodically get messages that say the uprade failed +
+  Usually, these aren't an indication of an issue unless the upgrade gets stuck, which is +
+  why I have some fairly long timeouts
