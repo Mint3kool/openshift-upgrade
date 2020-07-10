@@ -1,4 +1,6 @@
 ---
+#Convenient temporary script used to test and run cluster health checks
+#
 - name: Check cluster health 
   hosts: localhost
   vars:
