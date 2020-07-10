@@ -1,0 +1,6 @@
+Purpose
+~~~~~~~
+
+The Purpose of this role is to send a notification on either success or failure +
+of the cluster upgrade script.
+

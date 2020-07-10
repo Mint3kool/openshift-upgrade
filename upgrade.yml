@@ -3,15 +3,13 @@
   hosts: localhost
   vars:
     debug_json: false
-  roles:
-    - pre-upgrade-check
-
-- name: Gather relevant openshift cluster information
-  hosts: localhost
-  vars:
-    debug_json: false
-  roles:
-  - gather-cluster-info
+  tasks:
+    - name: Pre-Upgrade check
+      include_role: roles/pre-upgrade-check
+    - name: Cluster health check
+      include_role: roles/cluster-health-check
+    - name: Provide cluster upgrade paths
+      include_role: roles/gather-cluster-info
 
 - name: Upgrade cluster based on user input
   hosts: localhost
@@ -22,11 +20,19 @@
     prompt: "Which version would you like to upgrade to?"
     private: no
   roles:
-  - upgrade-cluster
+  - roles/upgrade-cluster
 
-- name: Verify cluster health after upgrade has completed
+- name: Verify status after upgrade has completed
   hosts: localhost
   vars:
     debug_json: false
-  roles:
-    - post-upgrade-check
+    upgrade: true
+  tasks:
+    - name: Check that everything is the correct cluster version
+      include_role: roles/post-upgrade-check
+    - name: Verify Cluster health
+      include_role: roles/cluster-health-check
+    - name: Send slack notification
+      include_role: roles/slack-notification
+      vars:
+       - success: true

@@ -1,7 +1,7 @@
 #Get all possible upgrade paths
 - name: Get the information on all possible upgrade paths
   command: oc adm upgrade
-  register: raw_upgrade_info # I'd like to somehow list all upgrade paths
+  register: raw_upgrade_info
 
 - name: Saving json output to /tmp/raw_upgrade_info.json
   copy:

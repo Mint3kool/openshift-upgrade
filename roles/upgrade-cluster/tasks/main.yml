@@ -20,29 +20,3 @@
     - progressing == ['True']
   retries: 10 # wait for 5 minutes max
   delay: 30
-
-- name: Make sure all cluster operators are available and have upgraded
-  k8s_info:
-    api_version: v1
-    kind: ClusterOperator
-  register: reg_ocp_co
-  vars:
-    available_query: "resources[*].status.conditions[?type=='Available'].status"
-    available: "{{ reg_ocp_co | json_query(available_query) | flatten | unique }}"
-    progressing_query: "resources[*].status.conditions[?type=='Progressing'].status"
-    progressing: "{{ reg_ocp_co | json_query(progressing_query) | flatten | unique }}"
-    degraded_query: "resources[*].status.conditions[?type=='Degraded'].status"
-    degraded: "{{ reg_ocp_co | json_query(degraded_query) | flatten | unique }}"
-    version_query: "resources[*].status.versions[?name=='operator'].version"
-    version: "{{reg_ocp_co | json_query(version_query) | flatten | unique }}"
-  until:
-    - reg_ocp_co.resources is defined
-    - reg_ocp_co.resources | length > 2
-    - available == ['True']
-    - progressing == ['False']
-    - degraded == ['False']
-    - version == [upgrade_version]
-  when: upgrade | bool
-  retries: 60 # wait for 1 hour max
-  delay: 60
-

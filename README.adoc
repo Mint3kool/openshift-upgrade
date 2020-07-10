@@ -38,3 +38,10 @@ Information about these scripts:
 4. Post Upgrade
     * Makes sure the cluster is up
     * Makes sure all cluster operators are up
+
+Notes
+~~~~~~
+* Most of the json queries you see were generated with the help of the JMESpath terminal
+* ref: https://github.com/jmespath/jmespath.terminal
+  - pip3 install --user jmespath-terminal
+  - jpterm <your_json_file>
