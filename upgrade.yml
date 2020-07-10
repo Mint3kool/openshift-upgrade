@@ -2,37 +2,39 @@
 - name: Verify openshift cluster is ready for upgrade
   hosts: localhost
   vars:
-    debug_json: false
+    debug_json: true
   tasks:
-    - name: Pre-Upgrade check
-      include_role: roles/pre-upgrade-check
-    - name: Cluster health check
-      include_role: roles/cluster-health-check
-    - name: Provide cluster upgrade paths
-      include_role: roles/gather-cluster-info
+  - name: Check cluster prior to upgrade
+    include_role:
+      name: pre-upgrade-check
+  - name: Cluster health check
+    include_role:
+      name: cluster-health-check
+  - name: Provide cluster upgrade paths
+    include_role:
+      name: gather-cluster-info
 
-- name: Upgrade cluster based on user input
+- name: Upgrade cluster and verify status after upgrade has completed
   hosts: localhost
-  vars:
-    upgrade: true
   vars_prompt:
   - name: "upgrade_version"
-    prompt: "Which version would you like to upgrade to?"
+    prompt: "Which version of OpenShift would you like ot upgrade to?"
     private: no
-  roles:
-  - roles/upgrade-cluster
-
-- name: Verify status after upgrade has completed
-  hosts: localhost
   vars:
     debug_json: false
     upgrade: true
   tasks:
-    - name: Check that everything is the correct cluster version
-      include_role: roles/post-upgrade-check
-    - name: Verify Cluster health
-      include_role: roles/cluster-health-check
-    - name: Send slack notification
-      include_role: roles/slack-notification
-      vars:
-       - success: true
+  - name: Upgrade cluster
+    include_role:
+      name: upgrade-cluster
+  - name: Check that everything is the correct cluster version
+    include_role:
+      name: post-upgrade-check
+  - name: Verify Cluster health
+    include_role:
+      name: cluster-health-check
+  - name: Send slack notification
+    include_role:
+      name: slack-notification
+    vars:
+     - success: true
