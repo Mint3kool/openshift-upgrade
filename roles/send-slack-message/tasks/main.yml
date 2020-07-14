@@ -1,23 +1,27 @@
 # We still want to verify the cluster is up beforehand here
+ 
+- name: Get Cluster Info After The Upgrade
+  k8s_info:
+    api_version: v1
+    kind: ClusterVersion
+  register: reg_ocp_version
+
 
 - name: Send success to slack
   vars:  
-    desired_query: "resources[0].status.desired.version"
-    desired: "{{ reg_ocp_version | json_query(desired_query) | flatten | unique }}"
     current_query: "resources[0].status.history[0].version"
-    current: "{{ reg_ocp_version | json_query(current_query) | flatten | unique }}"
-  when: desired == current and not failed | bool
+    current: "{{ reg_ocp_version | json_query(current_query) }}"
+  when: upgrade_version == current and not failed | bool
   slack:
     token: T016GJ98L7Q/B016PHM815H/6oBLZ7Nyb6BBbeTl81gmYVpG
     msg: 'test udpdate is succesful'
 
+
 - name: Send fail to slack
   vars:
-    progressing_query: "resources[0].status.conditions[?type=='Progressing'].status"
-    progressing: "{{ reg_ocp_version | json_query(progressing_query) | flatten | unique }}"    
-    desired: reg_ocp_version.resources[0].status.desired.version
-    current: reg_ocp_version.resources[0].status.history[0].version
-  when: desired != current or failed | bool
+    current_query: "resources[0].status.history[0].version"
+    current: "{{ reg_ocp_version | json_query(current_query) }}"
+  when: upgrade_version != current or failed | bool
   slack:
     token: T016GJ98L7Q/B016PHM815H/6oBLZ7Nyb6BBbeTl81gmYVpG
     msg: 'test udpdate is failure'

@@ -29,21 +29,23 @@
  
  - name: Upgrade cluster based on user input
    hosts: localhost
-   tasks:
-     - block:
-       - include_role:
-           name: upgrade-cluster
-         vars:
-           upgrade: true
-       rescue:
-       - include_role:
-           name: send-slack-message
-         vars:
-           failed: true
    vars_prompt:
-   - name: "upgrade_version"
+   - name: "upgrade_ver"
      prompt: "Which version would you like to upgrade to?"
      private: no
+   tasks:
+     - set_fact:
+         upgrade_version: "{{upgrade_ver}}"
+#     - block:
+#       - include_role:
+#           name: upgrade-cluster
+#         vars:`
+#           upgrade: true
+#       rescue:
+#       - include_role:
+#           name: send-slack-message
+#         vars:
+#           failed: true
  
  - name: Verify cluster health after upgrade has completed
    hosts: localhost
