@@ -2,9 +2,21 @@
   debug:
     msg: "{{upgrade_version}}"
 
+- name: Upgrade to latest Z stream
+  command: oc adm upgrade --to-latest=true
+  when:
+   - upgrade | bool
+   - y_update | bool
+  register: output
+
+- meta: end_play
+  when: "'Cluster is already at the latest available version'" in output
+
 - name: Perform the selected upgrade
   command: oc adm upgrade --to="{{upgrade_version}}"
-  when: upgrade | bool
+  when: 
+   - upgrade | bool
+   - not y_update | bool
 
 - name: Make sure cluster starts the upgrade process
   k8s_info:
