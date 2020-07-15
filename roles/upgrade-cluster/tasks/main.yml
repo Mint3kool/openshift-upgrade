@@ -2,6 +2,10 @@
   debug:
     msg: "{{upgrade_version}}"
 
+- name: Debug y_update
+  debug:
+    msg: "{{y_update}}"
+
 - name: Upgrade to latest Z stream
   command: oc adm upgrade --to-latest=true
   when:
@@ -10,7 +14,7 @@
   register: output
 
 - meta: end_play
-  when: "'Cluster is already at the latest available version'" in output
+  when: "'Cluster is already at the latest available version' in output"
 
 - name: Perform the selected upgrade
   command: oc adm upgrade --to="{{upgrade_version}}"
