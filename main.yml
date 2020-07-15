@@ -36,16 +36,16 @@
    tasks:
      - set_fact:
          upgrade_version: "{{upgrade_ver}}"
-#     - block:
-#       - include_role:
-#           name: upgrade-cluster
-#         vars:`
-#           upgrade: true
-#       rescue:
-#       - include_role:
-#           name: send-slack-message
-#         vars:
-#           failed: true
+     - block:
+       - include_role:
+           name: upgrade-cluster
+         vars:`
+           upgrade: true
+       rescue:
+       - include_role:
+           name: send-slack-message
+         vars:
+           failed: true
  
  - name: Verify cluster health after upgrade has completed
    hosts: localhost

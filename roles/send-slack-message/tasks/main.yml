@@ -6,16 +6,14 @@
     kind: ClusterVersion
   register: reg_ocp_version
 
-
 - name: Send success to slack
   vars:  
     current_query: "resources[0].status.history[0].version"
     current: "{{ reg_ocp_version | json_query(current_query) }}"
   when: upgrade_version == current and not failed | bool
   slack:
-    token: T016GJ98L7Q/B016PHM815H/6oBLZ7Nyb6BBbeTl81gmYVpG
+    token: "{{slack_token}}"
     msg: 'test udpdate is succesful'
-
 
 - name: Send fail to slack
   vars:
@@ -23,6 +21,6 @@
     current: "{{ reg_ocp_version | json_query(current_query) }}"
   when: upgrade_version != current or failed | bool
   slack:
-    token: T016GJ98L7Q/B016PHM815H/6oBLZ7Nyb6BBbeTl81gmYVpG
+    token: "{{slack_token}}"
     msg: 'test udpdate is failure'
   
