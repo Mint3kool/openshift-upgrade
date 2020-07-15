@@ -1,0 +1,3 @@
+Purpose
+~~~~~~~~
+The purpose of this role is to verify the health of a given OCP 4.3 cluster

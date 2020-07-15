@@ -1,4 +1,4 @@
 Role Description
 ~~~~~~~~~~~~~~~~
 
-The purpose of this role is to verify cluster health after an upgrade has completed
+The purpose of this role is to make sure that the cluster finished upgrading to the correct version.

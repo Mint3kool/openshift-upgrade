@@ -12,17 +12,21 @@
   retries: 10 # wait for 5 minutes max
   delay: 30
 
+#TODO: Check version number here as well
 - name: Verify that cluster finished the upgrade
   k8s_info:
     api_version: v1
     kind: ClusterVersion
   register: reg_ocp_version
   vars:
-    progressing_query: "resources[0].status.conditions[?type=='Progressing'].status"
+    progressing_query: "resources[*].status.conditions[?type=='Progressing'].status"
     progressing: "{{ reg_ocp_version | json_query(progressing_query) | flatten | unique }}"
+    desired_query: "resources[*].status.desired.version"
+    desired: "{{ reg_ocp_version | json_query(desired_query) | flatten | unique }}"
   when: not debug_json | bool
   until:
     - reg_ocp_version.resources is defined
     - progressing == ['False']
-  retries: 10 # wait for 5 minutes max
-  delay: 30
+    - desired == [upgrade_version]
+  retries: 60 # wait for 5 minutes max
+  delay: 60

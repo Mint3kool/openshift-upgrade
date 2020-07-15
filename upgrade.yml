@@ -3,30 +3,69 @@
   hosts: localhost
   vars:
     debug_json: false
-  roles:
-    - pre-upgrade-check
+  tasks:
+  - name: Check cluster prior to upgrade
+    include_role:
+      name: pre-upgrade-check
+  - name: Cluster health check
+    include_role:
+      name: cluster-health-check
 
-- name: Gather relevant openshift cluster information
+- name: Ask user whether or not they want to perform a Y stream update
   hosts: localhost
+  vars_prompt:
+  - name: "y_update"
+    prompt: "Would you like to perform a Y stream update? This will update the cluster to the latest Z stream update before providing versions, which may take up to an hour. Type <yes> or <no>."
+    private: no
   vars:
-    debug_json: false
-  roles:
-  - gather-cluster-info
-
-- name: Upgrade cluster based on user input
-  hosts: localhost
-  vars:
+    upgrade_version: latest
     upgrade: true
+    debug_json: false
+  tasks:
+  - name: Upgrade cluster to latest Z stream
+    include_role:
+      name: upgrade-cluster
+    when: y_update | bool
+  - name: Check cluster health after Z stream updates
+    include_role:
+      name: cluster-health-check
+    when: y_update | bool
+    #This script is written for OCP 4.3, which is why I'm doing this - making this generic is awkward in ansible
+  - name: Patch cluster for major version updates
+    command: oc patch clusterversion version --type="merge" -p '{"spec":{"channel":"stable-4.4"}}'
+    when: y_update | bool
+
+- name: Provide cluster upgrade paths
+  hosts: localhost
+  tasks: 
+  - name: Get the information on all possible upgrade paths
+    command: oc adm upgrade
+    register: raw_upgrade_info                                                                                                                                                                                       # The result of the upgrade command does not have nicely formatted json, so this is the quick and dirty way to display it
+  - name: Display upgrade information
+    debug:
+      msg: "{{raw_upgrade_info | json_query(\"stdout_lines\") | flatten | unique}}"
+
+- name: Upgrade cluster and verify status after upgrade has completed
+  hosts: localhost
   vars_prompt:
   - name: "upgrade_version"
-    prompt: "Which version would you like to upgrade to?"
+    prompt: "Which version of OpenShift do you want to upgrade to?"
     private: no
-  roles:
-  - upgrade-cluster
-
-- name: Verify cluster health after upgrade has completed
-  hosts: localhost
   vars:
     debug_json: false
-  roles:
-    - post-upgrade-check
+    upgrade: true
+  tasks:
+  - name: Upgrade cluster to "{{upgrade_version}}"
+    include_role:
+      name: upgrade-cluster
+  - name: Check that everything is the correct cluster version
+    include_role:
+      name: post-upgrade-check
+  - name: Verify Cluster health
+    include_role:
+      name: cluster-health-check
+      #  - name: Send slack notification
+      #include_role:
+      #name: slack-notification
+      #vars:
+      #- success: true

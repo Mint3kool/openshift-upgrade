@@ -1,4 +1,13 @@
 Role Description
 ~~~~~~~~~~~~~~~~
 
-The purpose of this role is to verify cluster health prior to performing a cluster upgrade. We are only attempting to upgrade from a healthy cluster since there are far too many edge cases that may prevent an upgrade if certain operators or components are down.
+The purpose of this role is to verify cluster state prior to a cluster upgrade. Future versions +
+of this script should be checking things like memory and cpu utilization requirements specific +
+to the upgrade process, to ensure that the cluster has resources available to safely upgrade.
+
+Steps
+~~~~~~~
+1. Verify the cluster is up
+2. Check that all cluster operators are available
+3. Make sure that the cluster is not currently upgrading
+
