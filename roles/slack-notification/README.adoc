@@ -1,6 +1,4 @@
-Purpose
-~~~~~~~
+Role Description
+~~~~~~~~~~~~~~~~
 
-The Purpose of this role is to send a notification on either success or failure +
-of the cluster upgrade script.
-
+The purpose of this role is to verify cluster health after an upgrade has completed

@@ -1,0 +1,26 @@
+# We still want to verify the cluster is up beforehand here
+ 
+- name: Get Cluster Info After The Upgrade
+  k8s_info:
+    api_version: v1
+    kind: ClusterVersion
+  register: reg_ocp_version
+
+- name: Send success to slack
+  vars:  
+    current_query: "resources[0].status.history[0].version"
+    current: "{{ reg_ocp_version | json_query(current_query) }}"
+  when: upgrade_version == current and not failed | bool
+  slack:
+    token: "{{slack_token}}"
+    msg: 'test udpdate is succesful'
+
+- name: Send fail to slack
+  vars:
+    current_query: "resources[0].status.history[0].version"
+    current: "{{ reg_ocp_version | json_query(current_query) }}"
+  when: upgrade_version != current or failed | bool
+  slack:
+    token: "{{slack_token}}"
+    msg: 'test udpdate is failure'
+  
