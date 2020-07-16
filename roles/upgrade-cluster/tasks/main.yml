@@ -2,10 +2,6 @@
   debug:
     msg: "{{upgrade_version}}"
 
-- name: Debug y_update
-  debug:
-    msg: "{{y_update}}"
-
 - name: Upgrade to latest Z stream
   command: oc adm upgrade --to-latest=true
   when:

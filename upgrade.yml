@@ -85,11 +85,6 @@
       - name: Verify Cluster health
         include_role:
           name: cluster-health-check
-          #  - name: Send slack notification
-          #include_role:
-          #name: slack-notification
-          #vars:
-          #- success: true
       - name: Send success slack message
         include_role:
           name: slack-notification
